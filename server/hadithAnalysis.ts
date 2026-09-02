@@ -1,6 +1,28 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { invokeLLM } from "./_core/llm";
+import { ENV } from "./_core/env";
+import { invokeLLM, isQuotaOrRateLimitError, type InvokeParams, type InvokeResult } from "./_core/llm";
+
+// Tries each model in ENV.llmModels in order, moving to the next only when
+// the current one is out of quota or rate-limited (HTTP 429) — any other
+// failure (bad request, auth, network) is not a model problem and is thrown
+// immediately instead of silently retried against a different model.
+async function invokeWithModelFallback(params: Omit<InvokeParams, "model">): Promise<InvokeResult> {
+  let lastError: unknown;
+  for (const model of ENV.llmModels) {
+    try {
+      return await invokeLLM({ ...params, model });
+    } catch (error) {
+      lastError = error;
+      if (isQuotaOrRateLimitError(error)) {
+        console.warn(`[Hadith analysis] model "${model}" is rate-limited or out of quota, trying next fallback model`);
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("تعذّر الاتصال بأي نموذج ذكاء اصطناعي مهيّأ");
+}
 
 export const hadithInputSchema = z.object({
   text: z.string().trim().min(12, "أدخل نصاً أوضح للحديث.").max(6000, "النص طويل جداً؛ يرجى الاكتفاء بمتن الحديث."),
@@ -139,8 +161,7 @@ export const SUNNI_HADITH_SYSTEM_PROMPT = `أنت مساعد بحثي متخصص
 
 export async function analyzeHadith(text: string) {
   try {
-    const response = await invokeLLM({
-      model: "gpt-5",
+    const response = await invokeWithModelFallback({
       maxCompletionTokens: 6000,
       reasoning: { effort: "medium" },
       messages: [
@@ -164,6 +185,9 @@ export async function analyzeHadith(text: string) {
     }
     if (error instanceof TRPCError) throw error;
     console.error("[Hadith analysis] failed", error);
+    if (isQuotaOrRateLimitError(error)) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "تجاوزت جميع النماذج المهيّأة حصتها الحالية. أضف نموذجاً بديلاً في LLM_MODELS أو تحقّق من رصيد مزوّد الذكاء الاصطناعي، ثم أعد المحاولة." });
+    }
     throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "تعذّر إتمام الفحص الآن. تحقّق من الاتصال ثم حاول مرة أخرى." });
   }
 }

@@ -8,7 +8,7 @@ export function ReviewProgress({ summary }: { summary: ReviewSummary }) {
   return (
     <div className="review-progress">
       <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-        <ClipboardCheck className="size-4 text-emerald-700 dark:text-emerald-300" />
+        <ClipboardCheck className="size-4 text-stone-700 dark:text-stone-300" />
         <span>تقدّم المراجعة العلمية</span>
         <span className="mr-auto text-xs font-semibold text-muted-foreground">{reviewed} من {summary.total}</span>
       </div>
