@@ -16,6 +16,14 @@ export function isQuotaOrRateLimitError(error: unknown): error is LLMError {
   return error instanceof LLMError && error.status === 429;
 }
 
+// True when a 400 names this exact request field as unsupported (OpenAI's
+// "Unknown parameter: '<param>'" shape). Lets callers retry the same model
+// without an optional field — e.g. non-reasoning models reject
+// reasoning_effort — instead of burning a fallback-model attempt on it.
+export function isUnsupportedParamError(error: unknown, paramName: string): error is LLMError {
+  return error instanceof LLMError && error.status === 400 && error.message.includes(`"param": "${paramName}"`);
+}
+
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
 export type TextContent = {
@@ -87,6 +95,10 @@ export type InvokeParams = {
   model?: string;
   thinking?: Record<string, unknown>;
   reasoning?: Record<string, unknown>;
+  // Chat Completions' flat reasoning-effort control (OpenAI reasoning models:
+  // "minimal" | "low" | "medium" | "high"). Only reasoning-capable models
+  // accept this field — see isUnsupportedParamError for graceful fallback.
+  reasoning_effort?: string;
 };
 
 export type ToolCall = {
@@ -372,6 +384,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     model,
     thinking,
     reasoning,
+    reasoning_effort,
     maxTokens,
     max_tokens,
     maxCompletionTokens,
@@ -413,6 +426,9 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   }
   if (reasoning) {
     payload.reasoning = reasoning;
+  }
+  if (reasoning_effort) {
+    payload.reasoning_effort = reasoning_effort;
   }
 
   const normalizedResponseFormat = normalizeResponseFormat({
