@@ -163,7 +163,6 @@ export async function analyzeHadith(text: string) {
   try {
     const response = await invokeWithModelFallback({
       maxCompletionTokens: 6000,
-      reasoning: { effort: "medium" },
       messages: [
         { role: "system", content: SUNNI_HADITH_SYSTEM_PROMPT },
         { role: "user", content: `حلّل هذا النص على أنه متن حديث أو جزء منه، ثم أعِد النتيجة المنظمة فقط:\n\n${text}` },
