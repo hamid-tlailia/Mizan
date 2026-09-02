@@ -39,7 +39,7 @@ export function TuruqSection({ hadithId, turuq, reviewMap, onReviewChange }: Tur
             <span className="tariq-badge"><GitBranch className="size-4" /></span>
             <div className="min-w-0 flex-1">
               <h3 className="break-words text-sm font-bold text-foreground">{tariq.label}</h3>
-              <p className="mt-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">{tariq.grade}</p>
+              <p className="mt-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300">{tariq.grade}</p>
             </div>
             <ReviewControl hadithId={hadithId} claimId={`tariq:${i}`} entry={reviewMap[`tariq:${i}`]} onChange={onReviewChange} />
           </header>
@@ -61,11 +61,11 @@ export function TuruqSection({ hadithId, turuq, reviewMap, onReviewChange }: Tur
                       return (
                         <div key={claimId} className="narrator-opinion">
                           <div className="flex flex-wrap items-start justify-between gap-2">
-                            <p className="break-words text-sm leading-7"><strong className="text-emerald-800 dark:text-emerald-300">{opinion.scholar}: </strong>«{opinion.statement}»<span className="verdict-chip">{opinion.verdict}</span></p>
+                            <p className="break-words text-sm leading-7"><strong className="text-stone-800 dark:text-stone-300">{opinion.scholar}: </strong>«{opinion.statement}»<span className="verdict-chip">{opinion.verdict}</span></p>
                             <ReviewControl hadithId={hadithId} claimId={claimId} entry={reviewMap[claimId]} onChange={onReviewChange} />
                           </div>
                           {opinion.documented ? (
-                            <p className="mt-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">موثّق: {opinion.book} — {opinion.reference}</p>
+                            <p className="mt-1.5 text-xs font-semibold text-stone-700 dark:text-stone-300">موثّق: {opinion.book} — {opinion.reference}</p>
                           ) : (
                             <p className="mt-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">غير موثّق بكتاب وموضع محدَّدين — يلزم التحقق قبل الاعتماد.</p>
                           )}

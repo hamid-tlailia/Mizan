@@ -58755,7 +58755,11 @@ var ENV = {
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
-  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? ""
+  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  // Comma-separated fallback chain, tried in order. When a model's quota or
+  // rate limit is hit (HTTP 429), the next one is tried automatically —
+  // see invokeWithModelFallback in hadithAnalysis.ts.
+  llmModels: (process.env.LLM_MODELS ?? "gpt-5").split(",").map((model) => model.trim()).filter(Boolean)
 };
 
 // server/db.ts
@@ -71740,6 +71744,17 @@ function date5(params) {
 config(en_default());
 
 // server/_core/llm.ts
+var LLMError = class extends Error {
+  status;
+  constructor(status, message2) {
+    super(message2);
+    this.name = "LLMError";
+    this.status = status;
+  }
+};
+function isQuotaOrRateLimitError(error46) {
+  return error46 instanceof LLMError && error46.status === 429;
+}
 var ensureArray = (value) => Array.isArray(value) ? value : [value];
 var normalizeContentPart = (part) => {
   if (typeof part === "string") {
@@ -71959,7 +71974,8 @@ async function invokeLLM(params) {
   });
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(
+    throw new LLMError(
+      response.status,
       `LLM invoke failed: ${response.status} ${response.statusText} \u2013 ${errorText}`
     );
   }
@@ -71967,6 +71983,22 @@ async function invokeLLM(params) {
 }
 
 // server/hadithAnalysis.ts
+async function invokeWithModelFallback(params) {
+  let lastError;
+  for (const model of ENV.llmModels) {
+    try {
+      return await invokeLLM({ ...params, model });
+    } catch (error46) {
+      lastError = error46;
+      if (isQuotaOrRateLimitError(error46)) {
+        console.warn(`[Hadith analysis] model "${model}" is rate-limited or out of quota, trying next fallback model`);
+        continue;
+      }
+      throw error46;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("\u062A\u0639\u0630\u0651\u0631 \u0627\u0644\u0627\u062A\u0635\u0627\u0644 \u0628\u0623\u064A \u0646\u0645\u0648\u0630\u062C \u0630\u0643\u0627\u0621 \u0627\u0635\u0637\u0646\u0627\u0639\u064A \u0645\u0647\u064A\u0651\u0623");
+}
 var hadithInputSchema = external_exports.object({
   text: external_exports.string().trim().min(12, "\u0623\u062F\u062E\u0644 \u0646\u0635\u0627\u064B \u0623\u0648\u0636\u062D \u0644\u0644\u062D\u062F\u064A\u062B.").max(6e3, "\u0627\u0644\u0646\u0635 \u0637\u0648\u064A\u0644 \u062C\u062F\u0627\u064B\u061B \u064A\u0631\u062C\u0649 \u0627\u0644\u0627\u0643\u062A\u0641\u0627\u0621 \u0628\u0645\u062A\u0646 \u0627\u0644\u062D\u062F\u064A\u062B.")
 });
@@ -72094,8 +72126,7 @@ var SUNNI_HADITH_SYSTEM_PROMPT = `\u0623\u0646\u062A \u0645\u0633\u0627\u0639\u0
 \u0644\u062D\u0642\u0644 turuq: \u0627\u0630\u0643\u0631 \u0643\u0644 \u0637\u0631\u064A\u0642 \u0645\u0639\u0631\u0648\u0641 \u0648\u0645\u0634\u0647\u0648\u0631 \u0631\u0648\u064A \u0628\u0647 \u0627\u0644\u062D\u062F\u064A\u062B (\u0644\u0627 \u062A\u0642\u062A\u0635\u0631 \u0639\u0644\u0649 \u0637\u0631\u064A\u0642 \u0648\u0627\u062D\u062F \u0625\u0646 \u0643\u0627\u0646 \u0644\u0647 \u0623\u0643\u062B\u0631 \u0645\u0646 \u0637\u0631\u064A\u0642 \u0645\u0634\u0647\u0648\u0631\u0629)\u060C \u0645\u0639 \u062A\u0633\u0645\u064A\u0629 \u0643\u0644 \u0637\u0631\u064A\u0642 \u0628\u0645\u0646 \u062F\u0627\u0631 \u0639\u0644\u064A\u0647 \u0627\u0644\u0625\u0633\u0646\u0627\u062F (\u0645\u062B\u0644: \xAB\u0637\u0631\u064A\u0642 \u0645\u0627\u0644\u0643 \u0639\u0646 \u0646\u0627\u0641\u0639 \u0639\u0646 \u0627\u0628\u0646 \u0639\u0645\u0631\xBB)\u060C \u0648\u062D\u0643\u0645 \u0623\u0647\u0644 \u0627\u0644\u0639\u0644\u0645 \u0639\u0644\u0649 \u0630\u0644\u0643 \u0627\u0644\u0637\u0631\u064A\u0642 \u062A\u062D\u062F\u064A\u062F\u0627\u064B \u0641\u064A \u062D\u0642\u0644 grade. \u0644\u0643\u0644 \u0631\u0627\u0648\u064D \u0641\u064A \u0627\u0644\u0633\u0646\u062F \u0627\u0630\u0643\u0631 \u0627\u0633\u0645\u0647 \u0648\u0637\u0628\u0642\u062A\u0647 (\u0635\u062D\u0627\u0628\u064A/\u062A\u0627\u0628\u0639\u064A/\u062A\u0627\u0628\u0639 \u062A\u0627\u0628\u0639\u064A/\u0645\u0646 \u0628\u0639\u062F\u0647\u0645) \u0648\u0645\u0648\u0636\u0639\u0647 \u0641\u064A \u0627\u0644\u0633\u0646\u062F. \u0644\u0643\u0644 \u0642\u0648\u0644 \u062C\u0631\u062D \u0623\u0648 \u062A\u0639\u062F\u064A\u0644 \u0641\u064A \u0631\u0627\u0648\u064D: \u0627\u0646\u0633\u0628\u0647 \u0644\u0646\u0627\u0642\u062F \u0645\u0639\u064A\u0651\u0646 \u0628\u0639\u064A\u0646\u0647 (\u0643\u0627\u0628\u0646 \u0645\u0639\u064A\u0646 \u0623\u0648 \u0623\u062D\u0645\u062F \u0623\u0648 \u0627\u0628\u0646 \u062D\u062C\u0631 \u0623\u0648 \u0627\u0644\u0630\u0647\u0628\u064A) \u0648\u0627\u0630\u0643\u0631 \u062F\u0631\u062C\u0629 \u0627\u0644\u0642\u0648\u0644 \u0641\u064A verdict\u060C \u0648\u0627\u062C\u0639\u0644 documented=true \u0641\u0642\u0637 \u0625\u0630\u0627 \u0643\u0646\u062A \u0645\u062A\u064A\u0642\u0646\u0627\u064B \u0645\u0646 \u0627\u0633\u0645 \u0627\u0644\u0643\u062A\u0627\u0628 \u0648\u0645\u0648\u0636\u0639 \u0627\u0644\u0642\u0648\u0644 \u0641\u064A\u0647 \u0641\u062A\u0630\u0643\u0631\u0647\u0645\u0627 \u0641\u064A book \u0648reference \u0628\u062F\u0642\u0629\u061B \u0648\u0625\u0644\u0627 \u0641\u0627\u062C\u0639\u0644 documented=false \u0648\u0627\u062A\u0631\u0643 book \u0648reference \u0641\u0627\u0631\u063A\u064A\u0646 \u0648\u0644\u0627 \u062A\u062E\u062A\u0631\u0639 \u0631\u0642\u0645 \u0635\u0641\u062D\u0629 \u0623\u0648 \u0645\u062C\u0644\u062F. \u0625\u0646 \u0644\u0645 \u062A\u0643\u0646 \u0648\u0627\u062B\u0642\u0627\u064B \u0645\u0646 \u062A\u0641\u0627\u0635\u064A\u0644 \u0637\u0631\u064A\u0642 \u0623\u0648 \u0631\u0627\u0648\u064D \u0641\u0627\u062D\u0630\u0641\u0647 \u0645\u0646 \u0627\u0644\u0645\u0635\u0641\u0648\u0641\u0629 \u0628\u062F\u0644\u0627\u064B \u0645\u0646 \u062A\u062E\u0645\u064A\u0646\u0647. \u0647\u0630\u0647 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u062A\u064F\u0639\u0631\u0636 \u0644\u0644\u0628\u0627\u062D\u062B \u0643\u0645\u0633\u0648\u062F\u0629 \u0644\u0644\u0645\u0631\u0627\u062C\u0639\u0629 \u0627\u0644\u0628\u0634\u0631\u064A\u0629 \u0648\u0644\u064A\u0633\u062A \u062D\u0643\u0645\u0627\u064B \u0646\u0647\u0627\u0626\u064A\u0627\u064B.`;
 async function analyzeHadith(text2) {
   try {
-    const response = await invokeLLM({
-      model: "gpt-5",
+    const response = await invokeWithModelFallback({
       maxCompletionTokens: 6e3,
       reasoning: { effort: "medium" },
       messages: [
@@ -72120,6 +72151,9 @@ ${text2}` }
     }
     if (error46 instanceof TRPCError) throw error46;
     console.error("[Hadith analysis] failed", error46);
+    if (isQuotaOrRateLimitError(error46)) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "\u062A\u062C\u0627\u0648\u0632\u062A \u062C\u0645\u064A\u0639 \u0627\u0644\u0646\u0645\u0627\u0630\u062C \u0627\u0644\u0645\u0647\u064A\u0651\u0623\u0629 \u062D\u0635\u062A\u0647\u0627 \u0627\u0644\u062D\u0627\u0644\u064A\u0629. \u0623\u0636\u0641 \u0646\u0645\u0648\u0630\u062C\u0627\u064B \u0628\u062F\u064A\u0644\u0627\u064B \u0641\u064A LLM_MODELS \u0623\u0648 \u062A\u062D\u0642\u0651\u0642 \u0645\u0646 \u0631\u0635\u064A\u062F \u0645\u0632\u0648\u0651\u062F \u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064A\u060C \u062B\u0645 \u0623\u0639\u062F \u0627\u0644\u0645\u062D\u0627\u0648\u0644\u0629." });
+    }
     throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "\u062A\u0639\u0630\u0651\u0631 \u0625\u062A\u0645\u0627\u0645 \u0627\u0644\u0641\u062D\u0635 \u0627\u0644\u0622\u0646. \u062A\u062D\u0642\u0651\u0642 \u0645\u0646 \u0627\u0644\u0627\u062A\u0635\u0627\u0644 \u062B\u0645 \u062D\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062E\u0631\u0649." });
   }
 }

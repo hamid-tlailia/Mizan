@@ -68,7 +68,7 @@ export function ReviewControl({ hadithId, claimId, entry, onChange }: ReviewCont
         <PopoverContent align="end" className="w-72 text-right">
           <p className="mb-2 text-xs font-bold text-foreground">ملاحظة المراجعة</p>
           <Textarea value={note} onChange={event => setNote(event.target.value)} placeholder="سبب الرفض أو مصدر التحقق المستخدم…" className="min-h-24 text-sm" />
-          <button type="button" onClick={saveNote} className="mt-2 w-full rounded-lg bg-emerald-700 py-1.5 text-xs font-bold text-white hover:bg-emerald-800 dark:bg-emerald-600">
+          <button type="button" onClick={saveNote} className="mt-2 w-full rounded-lg bg-stone-700 py-1.5 text-xs font-bold text-white hover:bg-stone-800 dark:bg-stone-600">
             حفظ الملاحظة
           </button>
         </PopoverContent>

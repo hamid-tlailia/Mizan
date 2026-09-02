@@ -1,5 +1,21 @@
 import { ENV } from "./env";
 
+export class LLMError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "LLMError";
+    this.status = status;
+  }
+}
+
+// 429 covers both rate limiting and quota exhaustion for OpenAI-compatible
+// APIs; callers use this to decide whether switching to a fallback model is
+// worth trying instead of failing outright.
+export function isQuotaOrRateLimitError(error: unknown): error is LLMError {
+  return error instanceof LLMError && error.status === 429;
+}
+
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
 export type TextContent = {
@@ -421,7 +437,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(
+    throw new LLMError(
+      response.status,
       `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
     );
   }
