@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --primary: oklch(0.42 0.095 155); --primary-foreground: oklch(0.99 0.01 95);
+  --sidebar-primary: oklch(0.42 0.095 155); --sidebar-primary-foreground: oklch(0.99 0.01 95);
+  --chart-1: oklch(0.52 0.11 155); --chart-2: oklch(0.62 0.11 155); --chart-3: oklch(0.7 0.13 85); --chart-4: oklch(0.65 0.13 35); --chart-5: oklch(0.45 0.08 155);
+  --radius: 0.85rem; --background: oklch(0.985 0.012 94); --foreground: oklch(0.25 0.025 70);
+  --card: oklch(1 0.006 90); --card-foreground: oklch(0.25 0.025 70); --popover: oklch(1 0.006 90); --popover-foreground: oklch(0.25 0.025 70);
+  --secondary: oklch(0.955 0.018 95); --secondary-foreground: oklch(0.33 0.035 70); --muted: oklch(0.95 0.012 95); --muted-foreground: oklch(0.52 0.025 75);
+  --accent: oklch(0.94 0.025 155); --accent-foreground: oklch(0.27 0.065 155); --destructive: oklch(0.53 0.18 28); --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.89 0.018 90); --input: oklch(0.89 0.018 90); --ring: oklch(0.45 0.1 155);
+  --sidebar: oklch(0.985 0.012 94); --sidebar-foreground: oklch(0.25 0.025 70); --sidebar-accent: oklch(0.94 0.025 155); --sidebar-accent-foreground: oklch(0.27 0.065 155); --sidebar-border: oklch(0.89 0.018 90); --sidebar-ring: oklch(0.45 0.1 155);
+}
+
+.dark {
+  --primary: oklch(0.7 0.1 155); --primary-foreground: oklch(0.18 0.03 155); --sidebar-primary: oklch(0.7 0.1 155); --sidebar-primary-foreground: oklch(0.18 0.03 155);
+  --background: oklch(0.18 0.017 155); --foreground: oklch(0.92 0.018 94); --card: oklch(0.23 0.02 155); --card-foreground: oklch(0.92 0.018 94); --popover: oklch(0.23 0.02 155); --popover-foreground: oklch(0.92 0.018 94);
+  --secondary: oklch(0.27 0.018 155); --secondary-foreground: oklch(0.81 0.018 94); --muted: oklch(0.28 0.018 155); --muted-foreground: oklch(0.72 0.018 94); --accent: oklch(0.29 0.045 155); --accent-foreground: oklch(0.9 0.02 94);
+  --destructive: oklch(0.7 0.16 28); --destructive-foreground: oklch(0.985 0 0); --border: oklch(0.92 0.02 94 / 13%); --input: oklch(0.92 0.02 94 / 15%); --ring: oklch(0.7 0.1 155);
+  --chart-1: oklch(0.7 0.1 155); --chart-2: oklch(0.62 0.1 155); --chart-3: oklch(0.72 0.1 85); --chart-4: oklch(0.68 0.13 35); --chart-5: oklch(0.53 0.08 155);
+  --sidebar: oklch(0.23 0.02 155); --sidebar-foreground: oklch(0.92 0.018 94); --sidebar-accent: oklch(0.29 0.045 155); --sidebar-accent-foreground: oklch(0.9 0.02 94); --sidebar-border: oklch(0.92 0.02 94 / 13%); --sidebar-ring: oklch(0.7 0.1 155);
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  html { direction: rtl; max-width: 100%; overflow-x: clip; }
+  body { @apply bg-background text-foreground; max-width: 100%; overflow-x: clip; font-family: "Noto Sans Arabic", sans-serif; background-image: radial-gradient(circle at 50% -20%, oklch(0.78 0.07 155 / 11%), transparent 42rem); }
+  #root { min-width: 0; max-width: 100%; overflow-x: clip; }
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]), [type="button"]:not(:disabled), [type="submit"]:not(:disabled), [type="reset"]:not(:disabled), a[href], select:not(:disabled), input[type="checkbox"]:not(:disabled), input[type="radio"]:not(:disabled) { @apply cursor-pointer; }
+}
+
+@layer components {
+  .container { width: 100%; margin-inline: auto; padding-inline: 1rem; }
+  .flex { min-height: 0; min-width: 0; }
+  .research-card { @apply rounded-[1.35rem] border border-border bg-card shadow-[0_14px_45px_-28px_rgba(33,75,55,0.38)]; }
+  .hero-section { @apply relative overflow-hidden pb-4 pt-14 sm:pt-20; }
+  .hero-section::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(90deg,transparent 49.8%,oklch(0.45 0.1 155 / 5%) 50%,transparent 50.2%),linear-gradient(0deg,transparent 49.8%,oklch(0.45 0.1 155 / 4%) 50%,transparent 50.2%); background-size: 58px 58px; mask-image: linear-gradient(to bottom,black,transparent 75%); }
+  .eyebrow { @apply inline-flex items-center gap-2 rounded-full border border-emerald-700/15 bg-emerald-700/8 px-3 py-1 text-xs font-bold text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-300; }
+  .nav-link { @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground; }
+  .nav-active { @apply bg-emerald-700/8 text-emerald-800 dark:bg-emerald-300/10 dark:text-emerald-300; }
+  .icon-theme-button { @apply grid size-9 place-items-center rounded-lg border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground active:scale-95; }
+  .icon-button { @apply grid size-8 place-items-center rounded-lg border border-white/15 bg-white/8 text-emerald-50 transition hover:bg-white/15 active:scale-95; }
+  .suggestion-chip { @apply border border-border bg-card text-muted-foreground shadow-sm hover:border-emerald-600/30 hover:bg-emerald-700/7 hover:text-emerald-800 dark:hover:text-emerald-300; }
+  .hadith-input, .hadith-text { font-family: "Noto Naskh Arabic", serif; }
+  .detail-accordion { @apply rounded-xl border border-border bg-background/40 px-4 last:border-b; }
+  .detail-accordion button { @apply py-4 text-right font-bold hover:no-underline; }
+  .detail-heading { @apply mb-2 text-sm font-bold text-emerald-800 dark:text-emerald-300; }
+  .detail-list { @apply space-y-2 text-sm leading-7 text-muted-foreground; }
+  .detail-list li { @apply relative pr-4; }
+  .detail-list li::before { content: ""; position: absolute; right: 0; top: .8em; width: .35rem; height: .35rem; border-radius: 50%; background: oklch(0.52 0.11 155); }
+  .detail-empty { @apply text-sm leading-7 text-muted-foreground; }
+  .source-row { @apply flex flex-col gap-2 rounded-xl border border-border bg-muted/35 p-3.5 text-sm md:flex-row md:items-start md:justify-between; }
+  .source-row h3 { @apply font-bold text-foreground; } .source-row p { @apply mt-0.5 text-muted-foreground; } .source-row > p { @apply max-w-sm text-xs leading-6; }
+  .scholar-quote { @apply rounded-xl border-r-4 border-emerald-700 bg-muted/40 p-4 text-sm leading-7; } .scholar-quote footer { @apply mt-2 flex flex-wrap gap-x-2 text-xs; } .scholar-quote footer strong { @apply text-emerald-800 dark:text-emerald-300; } .scholar-quote footer span { @apply text-muted-foreground; }
+  .feature-card { @apply rounded-2xl border border-border bg-card/65 p-5 text-right shadow-sm; } .feature-icon { @apply mb-4 grid size-9 place-items-center rounded-xl bg-emerald-700/10 text-emerald-800 dark:bg-emerald-300/10 dark:text-emerald-300; } .feature-card h2 { @apply font-bold text-foreground; } .feature-card p { @apply mt-2 text-sm leading-7 text-muted-foreground; }
+  .saved-item { @apply flex min-w-0 items-start gap-2 overflow-hidden rounded-xl border border-border bg-background/40 p-3 transition hover:border-emerald-600/25 hover:bg-emerald-700/5; }
+  .saved-hadith-matn { display: -webkit-box; overflow: hidden; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; @apply text-sm font-bold leading-7 text-foreground; }
+  .saved-hadith-meta { @apply mt-1 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs leading-5 text-muted-foreground; }
+  .saved-grade { @apply max-w-full break-words font-semibold text-foreground; }
+  .hadith-grade-badge { @apply inline-flex h-auto w-full min-w-0 max-w-full flex-wrap items-start gap-x-1.5 gap-y-1 overflow-visible px-3 py-2 text-right leading-6 whitespace-normal; }
+  .hadith-grade-detail { overflow-wrap: anywhere; white-space: normal; width: 100%; min-width: 0; max-width: 100%; flex: 0 0 100%; @apply border-t border-current/20 pt-1 text-right sm:mr-1.5 sm:w-auto sm:max-w-none sm:flex-none sm:border-r sm:border-t-0 sm:pr-1.5 sm:pt-0; }
+  .hadith-safe-text { overflow-wrap: anywhere; word-break: normal; }
+  .research-dossier-card { @apply mt-6 min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7; }
+  .dossier-heading { @apply flex min-w-0 flex-wrap items-start justify-between gap-4 border-b border-border pb-4; } .dossier-heading h2 { overflow-wrap: anywhere; @apply mt-1 text-lg font-bold text-foreground; }
+  .dataset-link { overflow-wrap: anywhere; @apply inline-flex max-w-full shrink-0 items-center gap-1 rounded-lg border border-emerald-700/20 bg-emerald-700/7 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-700/12 dark:text-emerald-300; }
+  .source-disclaimer { overflow-wrap: anywhere; @apply mt-4 max-w-full rounded-xl bg-muted/70 p-3 text-sm leading-7 text-muted-foreground; } .research-loading { @apply mt-5 animate-pulse text-sm font-semibold text-emerald-800 dark:text-emerald-300; }
+  .research-metrics { @apply mt-4 flex min-w-0 flex-wrap gap-2 text-xs text-muted-foreground; } .research-metrics span { overflow-wrap: anywhere; @apply max-w-full rounded-full border border-border bg-background px-2.5 py-1; }
+  .corpus-book { @apply min-w-0 max-w-full overflow-hidden rounded-xl border border-border; } .corpus-book-title { @apply flex min-w-0 flex-wrap items-center gap-2 border-b border-border bg-muted/45 px-4 py-3; } .corpus-book-title h3 { overflow-wrap: anywhere; @apply min-w-0 font-bold text-foreground; } .corpus-book-title span { @apply mr-auto shrink-0 rounded-full bg-background px-2 py-0.5 text-xs text-muted-foreground; }
+  .corpus-hit { @apply min-w-0 max-w-full overflow-hidden border-b border-border p-4 last:border-0; } .hadith-mini-text { overflow-wrap: anywhere; font-family: "Noto Naskh Arabic", serif; @apply mt-2 max-w-full text-base leading-8 text-foreground; }
+  .match-chip, .grade-source-chip, .no-grade-chip, .meta-chip, .meta-link { overflow-wrap: anywhere; white-space: normal; @apply max-w-full; }
+  .match-chip { @apply rounded-full bg-emerald-700/10 px-2 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300; } .grade-source-chip { @apply rounded-full bg-emerald-100 px-2 py-1 font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300; } .no-grade-chip { @apply rounded-full bg-amber-100 px-2 py-1 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300; } .meta-chip { @apply rounded-full bg-muted px-2 py-1 text-muted-foreground; } .meta-link { @apply rounded-full bg-emerald-700 px-2 py-1 font-semibold text-white hover:bg-emerald-800; }
+  .narrator-limit { @apply mt-5 flex min-w-0 gap-3 rounded-xl border border-amber-700/15 bg-amber-50/70 p-4 text-sm leading-7 text-amber-950 dark:border-amber-300/10 dark:bg-amber-100/5 dark:text-amber-100; } .narrator-limit p { overflow-wrap: anywhere; @apply min-w-0; }
+  .research-note-input { @apply min-h-48 w-full resize-y rounded-xl border border-border bg-background p-3 text-sm leading-7 text-foreground outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10; }
+  .share-card { overflow: hidden; border-radius: 1rem; background: #fbfaf3; color: #23352c; border: 1px solid #d9d5c7; box-shadow: 0 12px 28px -20px rgba(13, 72, 47, .45); }
+  .share-card-topline { display: flex; align-items: center; gap: .65rem; min-height: 4.6rem; padding: 1rem 1.15rem; color: #fff9e8; background: linear-gradient(125deg, #0b4a31, #13643e 62%, #0e5132); }
+  .share-card-mark { display: grid; place-items: center; width: 2.35rem; height: 2.35rem; flex: none; border-radius: .7rem; background: rgba(255,255,255,.12); color: #e5c56f; }
+  .share-card-topline p { font-family: "Noto Naskh Arabic", serif; font-size: 1.22rem; font-weight: 700; line-height: 1.15; } .share-card-topline small { color: #c7dfcc; font-size: .66rem; }
+  .share-card-body { padding: 1.25rem 1.4rem 1.3rem; text-align: right; } .share-card-label { color: #5b6a5e; font-size: .68rem; font-weight: 700; }
+  .share-card-matn { margin-top: .55rem; font-family: "Noto Naskh Arabic", serif; font-size: 1.22rem; line-height: 2; text-align: center; } .share-card-grade { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; margin-top: 1rem; font-size: .76rem; color: #5b6a5e; } .share-card-badge { border: 1px solid; border-radius: 999px; padding: .26rem .65rem; font-weight: 700; }
+  .share-card-summary { margin-top: .9rem; border-top: 1px solid #e5e0d4; padding-top: .85rem; font-size: .73rem; line-height: 1.85; color: #526158; } .share-card-grade-type { overflow-wrap: anywhere; max-width: 100%; } .share-card footer { padding: .65rem 1.4rem .8rem; background: #f4f0e6; color: #67756b; text-align: center; font-size: .61rem; line-height: 1.5; }
+  @media (min-width: 640px) { .container { padding-inline: 1.5rem; } }
+  @media (min-width: 1024px) { .container { max-width: 1280px; padding-inline: 2rem; } }
+  @media (max-width: 639px) { .hadith-text { font-size: 1.15rem; line-height: 2.35; } .research-card { border-radius: 1.1rem; } .dossier-heading { align-items: stretch; } .dataset-link { width: 100%; justify-content: center; } .corpus-book-title span { margin-inline-start: 0; } }
+}
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
