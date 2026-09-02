@@ -1,0 +1,16 @@
+{
+  "name": "ميزان الحديث",
+  "short_name": "ميزان الحديث",
+  "description": "أداة عربية مساعدة لفحص وتخريج الأحاديث.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf9f2",
+  "theme_color": "#0f5132",
+  "icons": [
+    { "src": "/icons/mizan-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/mizan-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/mizan-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
