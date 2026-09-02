@@ -72128,7 +72128,6 @@ async function analyzeHadith(text2) {
   try {
     const response = await invokeWithModelFallback({
       maxCompletionTokens: 6e3,
-      reasoning: { effort: "medium" },
       messages: [
         { role: "system", content: SUNNI_HADITH_SYSTEM_PROMPT },
         { role: "user", content: `\u062D\u0644\u0651\u0644 \u0647\u0630\u0627 \u0627\u0644\u0646\u0635 \u0639\u0644\u0649 \u0623\u0646\u0647 \u0645\u062A\u0646 \u062D\u062F\u064A\u062B \u0623\u0648 \u062C\u0632\u0621 \u0645\u0646\u0647\u060C \u062B\u0645 \u0623\u0639\u0650\u062F \u0627\u0644\u0646\u062A\u064A\u062C\u0629 \u0627\u0644\u0645\u0646\u0638\u0645\u0629 \u0641\u0642\u0637:
