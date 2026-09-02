@@ -178,7 +178,11 @@ export const SUNNI_HADITH_SYSTEM_PROMPT = `أنت مساعد بحثي متخصص
 export async function analyzeHadith(text: string) {
   try {
     const response = await invokeWithModelFallback({
-      maxCompletionTokens: 6000,
+      // Reasoning models bill their hidden reasoning tokens against this same
+      // budget, and the turuq/narrators schema is large — too low a limit
+      // truncates the JSON mid-object (finish_reason "length") long before
+      // any real text-clarity problem, so this needs real headroom.
+      maxCompletionTokens: 16000,
       messages: [
         { role: "system", content: SUNNI_HADITH_SYSTEM_PROMPT },
         { role: "user", content: `حلّل هذا النص على أنه متن حديث أو جزء منه، ثم أعِد النتيجة المنظمة فقط:\n\n${text}` },
@@ -189,14 +193,25 @@ export async function analyzeHadith(text: string) {
       },
     });
 
-    const content = response.choices[0]?.message.content;
+    const choice = response.choices[0];
+    const content = choice?.message.content;
     if (typeof content !== "string") {
       throw new Error("لم تُستلم استجابة نصية قابلة للمعالجة");
     }
-    return hadithAnalysisSchema.parse(JSON.parse(content));
+    try {
+      return hadithAnalysisSchema.parse(JSON.parse(content));
+    } catch (parseError) {
+      console.error("[Hadith analysis] failed to parse model output", {
+        finishReason: choice?.finish_reason,
+        contentLength: content.length,
+        contentPreview: content.slice(0, 400),
+        error: parseError,
+      });
+      throw parseError;
+    }
   } catch (error) {
     if (error instanceof z.ZodError || error instanceof SyntaxError) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "تعذّر فهم النص أو تنظيم نتيجته. جرّب إدخال متن أوضح." });
+      throw new TRPCError({ code: "BAD_REQUEST", message: "تعذّر تنظيم نتيجة الفحص. جرّب مرة أخرى، أو أدخل متناً أقصر إن استمر العطل." });
     }
     if (error instanceof TRPCError) throw error;
     console.error("[Hadith analysis] failed", error);
