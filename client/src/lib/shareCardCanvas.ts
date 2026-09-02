@@ -1,4 +1,11 @@
 import type { HadithAnalysis } from "@shared/hadith";
+import { getHadithGradeTone, type HadithGradeTone } from "@shared/hadithPresentation";
+
+const GRADE_BADGE_COLORS: Record<HadithGradeTone, string> = {
+  positive: "#1f7a42", // صحيح — أخضر
+  caution: "#b8791a", // حسن / مختلف فيه — أصفر-كهرماني
+  negative: "#b3261e", // ضعيف / موضوع — أحمر
+};
 
 const CARD_WIDTH = 1080;
 const CONTENT_INSET = 72;
@@ -80,10 +87,10 @@ export function createShareCardCanvas(result: HadithAnalysis): HTMLCanvasElement
   canvas.width = CARD_WIDTH;
   canvas.height = height;
   const context = getContext(canvas);
-  context.fillStyle = "#fbfaf3";
+  context.fillStyle = "#fbf5e6";
   context.fillRect(0, 0, CARD_WIDTH, height);
 
-  context.fillStyle = "#0b4a31";
+  context.fillStyle = "#3a2410";
   roundRect(context, 0, 0, CARD_WIDTH, headerHeight, 34);
   context.fill();
   context.fillStyle = "#e5c56f";
@@ -91,57 +98,58 @@ export function createShareCardCanvas(result: HadithAnalysis): HTMLCanvasElement
   context.textAlign = "left";
   context.fillText("⚖", 100, 112);
   context.textAlign = "right";
-  context.fillStyle = "#fff9e8";
+  context.fillStyle = "#f7ecd2";
   context.font = "700 44px 'Noto Naskh Arabic', Arial, sans-serif";
   context.fillText("ميزان الحديث", CARD_WIDTH - CONTENT_INSET, 82);
-  context.fillStyle = "#c7dfcc";
+  context.fillStyle = "#dcc39a";
   context.font = "400 25px 'Noto Sans Arabic', Arial, sans-serif";
   context.fillText("نتيجة فحص وتخريج مبدئية", CARD_WIDTH - CONTENT_INSET, 128);
 
   let cursor = headerHeight + 48;
   context.textAlign = "right";
-  context.fillStyle = "#5b6a5e";
+  context.fillStyle = "#7a6247";
   context.font = "700 25px 'Noto Sans Arabic', Arial, sans-serif";
   context.fillText("متن الحديث", CARD_WIDTH - CONTENT_INSET, cursor);
   cursor += 38;
-  context.fillStyle = "#23352c";
+  context.fillStyle = "#33210f";
   context.font = "700 42px 'Noto Naskh Arabic', Arial, sans-serif";
   context.textAlign = "center";
   drawLines(context, matnLines, CARD_WIDTH / 2, cursor + 34, 74);
   cursor += matnHeight;
 
-  context.fillStyle = "#f2f5ef";
+  const badgeColor = GRADE_BADGE_COLORS[getHadithGradeTone(result.grade)];
+  context.fillStyle = "#f1e9d4";
   roundRect(context, CONTENT_INSET, cursor, BODY_WIDTH, gradeHeight, 22);
   context.fill();
-  context.fillStyle = "#17633d";
+  context.fillStyle = badgeColor;
   roundRect(context, CARD_WIDTH - CONTENT_INSET - 210, cursor + 20, 190, 52, 26);
   context.fill();
   context.fillStyle = "#ffffff";
   context.font = "700 28px 'Noto Sans Arabic', Arial, sans-serif";
   context.textAlign = "center";
   context.fillText(content.grade, CARD_WIDTH - CONTENT_INSET - 115, cursor + 55);
-  context.fillStyle = "#43564a";
+  context.fillStyle = "#5c4a35";
   context.font = "400 28px 'Noto Sans Arabic', Arial, sans-serif";
   context.textAlign = "right";
   drawLines(context, gradeTypeLines, CARD_WIDTH - CONTENT_INSET - 238, cursor + 48, 46);
   cursor += gradeHeight + 30;
 
-  context.strokeStyle = "#e5e0d4";
+  context.strokeStyle = "#e9dcbe";
   context.lineWidth = 2;
   context.beginPath();
   context.moveTo(CONTENT_INSET, cursor);
   context.lineTo(CARD_WIDTH - CONTENT_INSET, cursor);
   context.stroke();
   cursor += 42;
-  context.fillStyle = "#526158";
+  context.fillStyle = "#5c4a35";
   context.font = "400 28px 'Noto Sans Arabic', Arial, sans-serif";
   context.textAlign = "right";
   drawLines(context, summaryLines, CARD_WIDTH - CONTENT_INSET, cursor, 48);
   cursor += summaryHeight;
 
-  context.fillStyle = "#f4f0e6";
+  context.fillStyle = "#f2e6cb";
   context.fillRect(0, height - footerHeight, CARD_WIDTH, footerHeight);
-  context.fillStyle = "#67756b";
+  context.fillStyle = "#7a6853";
   context.font = "400 23px 'Noto Sans Arabic', Arial, sans-serif";
   context.textAlign = "center";
   drawLines(context, footerLines, CARD_WIDTH / 2, height - footerHeight + 42, 36);

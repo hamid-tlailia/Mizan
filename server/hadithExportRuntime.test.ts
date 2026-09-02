@@ -103,6 +103,51 @@ describe("التصدير التشغيلي لبطاقة الحديث", () => {
     getContext.mockRestore();
   });
 
+  it("يلوّن شارة الدرجة حسب دلالتها بدل لون ثابت (أخضر لصحيح، أحمر لضعيف)", () => {
+    const buildTrackedContext = () => {
+      const fillStyleHistory: string[] = [];
+      let currentFillStyle = "";
+      return {
+        context: {
+          direction: "rtl",
+          font: "",
+          get fillStyle() { return currentFillStyle; },
+          set fillStyle(value: string) { currentFillStyle = value; fillStyleHistory.push(value); },
+          strokeStyle: "",
+          lineWidth: 0,
+          textAlign: "right",
+          beginPath: vi.fn(),
+          roundRect: vi.fn(),
+          closePath: vi.fn(),
+          fill: vi.fn(),
+          fillRect: vi.fn(),
+          fillText: vi.fn(),
+          measureText: vi.fn((text: string) => ({ width: text.length * 15 })),
+          moveTo: vi.fn(),
+          lineTo: vi.fn(),
+          stroke: vi.fn(),
+        },
+        fillStyleHistory,
+      };
+    };
+
+    const weak: HadithAnalysis = { ...exportResult, grade: "ضعيف" };
+    const { context: weakContext, fillStyleHistory: weakHistory } = buildTrackedContext();
+    let getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(weakContext as unknown as CanvasRenderingContext2D);
+    createShareCardCanvas(weak);
+    getContext.mockRestore();
+
+    const { context: soundContext, fillStyleHistory: soundHistory } = buildTrackedContext();
+    getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(soundContext as unknown as CanvasRenderingContext2D);
+    createShareCardCanvas(exportResult);
+    getContext.mockRestore();
+
+    expect(weakHistory).toContain("#b3261e");
+    expect(weakHistory).not.toContain("#1f7a42");
+    expect(soundHistory).toContain("#1f7a42");
+    expect(soundHistory).not.toContain("#b3261e");
+  });
+
   it("يشغّل تنزيل PNG وحفظ PDF عبر المسارين الفعليين بعد تجهيز canvas البطاقة", async () => {
     const pngBlob = new Blob(["card"], { type: "image/png" });
     const actions = { makePngBlob: vi.fn(async () => pngBlob), downloadPng: vi.fn(), makePdf: vi.fn() };
