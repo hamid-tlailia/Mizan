@@ -1,7 +1,23 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { ENV } from "./_core/env";
-import { invokeLLM, isQuotaOrRateLimitError, type InvokeParams, type InvokeResult } from "./_core/llm";
+import { invokeLLM, isQuotaOrRateLimitError, isUnsupportedParamError, type InvokeParams, type InvokeResult } from "./_core/llm";
+
+// Requests low reasoning effort for speed — reasoning-class models (GPT-5
+// and similar) default to "medium", which is noticeably slower for a task
+// this constrained. Only reasoning-capable models accept the field at all,
+// so a model that rejects it (400 "Unknown parameter") is retried once
+// without it rather than treated as a real failure.
+async function invokeModelWithReasoningEffort(model: string, params: Omit<InvokeParams, "model">): Promise<InvokeResult> {
+  try {
+    return await invokeLLM({ ...params, model, reasoning_effort: "low" });
+  } catch (error) {
+    if (isUnsupportedParamError(error, "reasoning_effort")) {
+      return await invokeLLM({ ...params, model });
+    }
+    throw error;
+  }
+}
 
 // Tries each model in ENV.llmModels in order, moving to the next only when
 // the current one is out of quota or rate-limited (HTTP 429) — any other
@@ -11,7 +27,7 @@ async function invokeWithModelFallback(params: Omit<InvokeParams, "model">): Pro
   let lastError: unknown;
   for (const model of ENV.llmModels) {
     try {
-      return await invokeLLM({ ...params, model });
+      return await invokeModelWithReasoningEffort(model, params);
     } catch (error) {
       lastError = error;
       if (isQuotaOrRateLimitError(error)) {

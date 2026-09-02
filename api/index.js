@@ -71755,6 +71755,9 @@ var LLMError = class extends Error {
 function isQuotaOrRateLimitError(error46) {
   return error46 instanceof LLMError && error46.status === 429;
 }
+function isUnsupportedParamError(error46, paramName) {
+  return error46 instanceof LLMError && error46.status === 400 && error46.message.includes(`"param": "${paramName}"`);
+}
 var ensureArray = (value) => Array.isArray(value) ? value : [value];
 var normalizeContentPart = (part) => {
   if (typeof part === "string") {
@@ -71920,6 +71923,7 @@ async function invokeLLM(params) {
     model,
     thinking,
     reasoning,
+    reasoning_effort,
     maxTokens,
     max_tokens,
     maxCompletionTokens,
@@ -71955,6 +71959,9 @@ async function invokeLLM(params) {
   if (reasoning) {
     payload.reasoning = reasoning;
   }
+  if (reasoning_effort) {
+    payload.reasoning_effort = reasoning_effort;
+  }
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
     response_format,
@@ -71983,11 +71990,21 @@ async function invokeLLM(params) {
 }
 
 // server/hadithAnalysis.ts
+async function invokeModelWithReasoningEffort(model, params) {
+  try {
+    return await invokeLLM({ ...params, model, reasoning_effort: "low" });
+  } catch (error46) {
+    if (isUnsupportedParamError(error46, "reasoning_effort")) {
+      return await invokeLLM({ ...params, model });
+    }
+    throw error46;
+  }
+}
 async function invokeWithModelFallback(params) {
   let lastError;
   for (const model of ENV.llmModels) {
     try {
-      return await invokeLLM({ ...params, model });
+      return await invokeModelWithReasoningEffort(model, params);
     } catch (error46) {
       lastError = error46;
       if (isQuotaOrRateLimitError(error46)) {
