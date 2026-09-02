@@ -2,6 +2,7 @@
 import "@testing-library/jest-dom/vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
+import path from "node:path";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { StoredHadith } from "../shared/hadith";
@@ -20,7 +21,7 @@ vi.mock("@/components/HadithSearch", () => ({ HadithSearch: ({ onSubmit }: { onS
 vi.mock("@/components/AnalysisSkeleton", () => ({ AnalysisSkeleton: () => <div /> }));
 vi.mock("@/components/SavedPanel", () => ({ SavedPanel: () => <div /> }));
 vi.mock("@/components/ResultCard", () => ({ ResultCard: () => <div>بطاقة النتيجة</div> }));
-vi.mock("@/lib/hadithService", () => ({ validateHadithRequest: () => null, useHadithAnalysisService: () => ({ isPending: false, analyze: (_text: string, callbacks: { onSuccess: (value: unknown) => void }) => callbacks.onSuccess({ matn: "نص اختبار", grade: "صحيح", gradeType: "صحيح", summary: "ملخص", confidenceNote: "تنبيه", sources: [], isnadStudy: [], matnStudy: [], scholars: [], caution: "ملاحظة" }) }) }));
+vi.mock("@/lib/hadithService", () => ({ validateHadithRequest: () => null, useHadithAnalysisService: () => ({ isPending: false, analyze: (_text: string, callbacks: { onSuccess: (value: unknown) => void }) => callbacks.onSuccess({ matn: "نص اختبار", grade: "صحيح", gradeType: "صحيح", summary: "ملخص", confidenceNote: "تنبيه", sources: [], isnadStudy: [], matnStudy: [], scholars: [], turuq: [], caution: "ملاحظة" }) }) }));
 vi.mock("@/lib/hadithStorage", () => ({
   HISTORY_KEY: "history", FAVORITES_KEY: "favorites", NOTES_KEY: "notes",
   loadStoredHadith: () => storedRecords, saveStoredHadith: vi.fn(), limitStored: <T,>(items: T[]) => items,
@@ -46,17 +47,18 @@ describe("مسار ملف الحديث في الواجهة", () => {
     expect(screen.getByText("لم يُعثر على ملف الحديث")).toBeInTheDocument();
   });
   it("يعرض مراجع جرح وتعديل موثقة ويخفي نتائج البحث غير المستقرة", () => {
-    const record: StoredHadith = { id: "mobile-record", checkedAt: 1_700_000_000_000, matn: "متن حديث طويل للاختبار", grade: "صحيح", gradeType: "صحيح", summary: "ملخص", confidenceNote: "تنبيه", sources: [], isnadStudy: [], matnStudy: [], scholars: [], caution: "ملاحظة" };
+    const record: StoredHadith = { id: "mobile-record", checkedAt: 1_700_000_000_000, matn: "متن حديث طويل للاختبار", grade: "صحيح", gradeType: "صحيح", summary: "ملخص", confidenceNote: "تنبيه", sources: [], isnadStudy: [], matnStudy: [], scholars: [], turuq: [], caution: "ملاحظة" };
     const longText = "هذا نص مصدر طويل جداً للتحقق من بقائه داخل بطاقة ملف الحديث على شاشة الهاتف مهما امتدت العبارة وتكررت البيانات المصدرية";
     routeParams = { id: record.id }; storedRecords = [record];
     researchData = { sourceNotice: longText, searchedCollections: ["bukhari"], unavailableCollections: [], searchedTerms: ["نص"], narrators: [], hits: [{ hadithKey: "bukhari:1", collection: "bukhari", hadithNumber: "1", text: longText, similarity: 100, grade: "صحيح", grader: longText, gradeSource: longText, attributionText: longText }] };
     const view = render(<HadithDossier />);
     expect(view.container.querySelector(".research-dossier-card")).toBeInTheDocument();
     expect(view.container.querySelector(".dataset-link")).toBeInTheDocument();
-    expect(view.container.querySelector(".source-disclaimer")).toHaveTextContent("أزيلت طبقة البحث النصي");
+    const disclaimers = view.container.querySelectorAll(".source-disclaimer");
+    expect(Array.from(disclaimers).some(node => node.textContent?.includes("نسخ رقمية موثقة لكتب الرجال"))).toBe(true);
     expect(view.container.querySelectorAll(".corpus-book")).toHaveLength(2);
-    expect(view.container.querySelector(".narrator-limit")).toHaveTextContent("لا توجد حالياً قاعدة رواة مرخّصة");
-    const styles = readFileSync("/home/ubuntu/hadith-verifier/client/src/index.css", "utf8");
+    expect(view.container.querySelector(".narrator-limit")).toHaveTextContent("لم يتمكن الفحص الآلي من إثبات طرق أو رواة");
+    const styles = readFileSync(path.resolve(process.cwd(), "client/src/index.css"), "utf8");
     expect(styles).toContain(".dataset-link { overflow-wrap: anywhere");
     expect(styles).toContain(".source-disclaimer { overflow-wrap: anywhere");
   });

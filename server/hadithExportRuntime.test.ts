@@ -12,7 +12,7 @@ const canvas: ExportCanvas = {
   toBlob: vi.fn(callback => callback(new Blob(["card"], { type: "image/png" }))),
 };
 
-const exportResult: HadithAnalysis = { matn: "متن مختصر", grade: "صحيح", gradeType: "صحيح لذاته", summary: "خلاصة الاختبار", confidenceNote: "تنبيه", sources: [], isnadStudy: [], matnStudy: [], scholars: [], caution: "تنبيه" };
+const exportResult: HadithAnalysis = { matn: "متن مختصر", grade: "صحيح", gradeType: "صحيح لذاته", summary: "خلاصة الاختبار", confidenceNote: "تنبيه", sources: [], isnadStudy: [], matnStudy: [], scholars: [], turuq: [], caution: "تنبيه" };
 
 describe("التصدير التشغيلي لبطاقة الحديث", () => {
   it("ينشئ Blob لصورة PNG ثم يطلق تنزيلها", async () => {

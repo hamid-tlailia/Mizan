@@ -5,7 +5,7 @@ import type { HadithAnalysis } from "../shared/hadith";
 const memory = new Map<string, string>();
 vi.stubGlobal("localStorage", { getItem: (key: string) => memory.get(key) ?? null, setItem: (key: string, value: string) => memory.set(key, value) });
 
-const analysis: HadithAnalysis = { matn: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ", grade: "صحيح", gradeType: "صحيح", summary: "ملخص", confidenceNote: "تنبيه", sources: [], isnadStudy: [], matnStudy: [], scholars: [], caution: "ملاحظة" };
+const analysis: HadithAnalysis = { matn: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ", grade: "صحيح", gradeType: "صحيح", summary: "ملخص", confidenceNote: "تنبيه", sources: [], isnadStudy: [], matnStudy: [], scholars: [], turuq: [], caution: "ملاحظة" };
 
 afterEach(() => memory.clear());
 

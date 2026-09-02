@@ -52,6 +52,7 @@
   --accent: oklch(0.94 0.025 155); --accent-foreground: oklch(0.27 0.065 155); --destructive: oklch(0.53 0.18 28); --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.89 0.018 90); --input: oklch(0.89 0.018 90); --ring: oklch(0.45 0.1 155);
   --sidebar: oklch(0.985 0.012 94); --sidebar-foreground: oklch(0.25 0.025 70); --sidebar-accent: oklch(0.94 0.025 155); --sidebar-accent-foreground: oklch(0.27 0.065 155); --sidebar-border: oklch(0.89 0.018 90); --sidebar-ring: oklch(0.45 0.1 155);
+  --gold: oklch(0.72 0.13 85); --gold-foreground: oklch(0.22 0.04 85); --gold-soft: oklch(0.72 0.13 85 / 12%);
 }
 
 .dark {
@@ -61,6 +62,7 @@
   --destructive: oklch(0.7 0.16 28); --destructive-foreground: oklch(0.985 0 0); --border: oklch(0.92 0.02 94 / 13%); --input: oklch(0.92 0.02 94 / 15%); --ring: oklch(0.7 0.1 155);
   --chart-1: oklch(0.7 0.1 155); --chart-2: oklch(0.62 0.1 155); --chart-3: oklch(0.72 0.1 85); --chart-4: oklch(0.68 0.13 35); --chart-5: oklch(0.53 0.08 155);
   --sidebar: oklch(0.23 0.02 155); --sidebar-foreground: oklch(0.92 0.018 94); --sidebar-accent: oklch(0.29 0.045 155); --sidebar-accent-foreground: oklch(0.9 0.02 94); --sidebar-border: oklch(0.92 0.02 94 / 13%); --sidebar-ring: oklch(0.7 0.1 155);
+  --gold: oklch(0.78 0.12 85); --gold-foreground: oklch(0.2 0.03 85); --gold-soft: oklch(0.78 0.12 85 / 14%);
 }
 
 @layer base {
@@ -103,7 +105,7 @@
   .hadith-grade-detail { overflow-wrap: anywhere; white-space: normal; width: 100%; min-width: 0; max-width: 100%; flex: 0 0 100%; @apply border-t border-current/20 pt-1 text-right sm:mr-1.5 sm:w-auto sm:max-w-none sm:flex-none sm:border-r sm:border-t-0 sm:pr-1.5 sm:pt-0; }
   .hadith-safe-text { overflow-wrap: anywhere; word-break: normal; }
   .research-dossier-card { @apply mt-6 min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7; }
-  .dossier-heading { @apply flex min-w-0 flex-wrap items-start justify-between gap-4 border-b border-border pb-4; } .dossier-heading h2 { overflow-wrap: anywhere; @apply mt-1 text-lg font-bold text-foreground; }
+  .dossier-heading { @apply flex min-w-0 flex-wrap items-start justify-between gap-4 border-b border-border pb-4; } .dossier-heading h2 { overflow-wrap: anywhere; @apply relative mt-1 pr-3 text-lg font-bold text-foreground; } .dossier-heading h2::before { content: ""; position: absolute; right: 0; top: .2em; bottom: .2em; width: 3px; border-radius: 2px; background: var(--gold); }
   .dataset-link { overflow-wrap: anywhere; @apply inline-flex max-w-full shrink-0 items-center gap-1 rounded-lg border border-emerald-700/20 bg-emerald-700/7 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-700/12 dark:text-emerald-300; }
   .source-disclaimer { overflow-wrap: anywhere; @apply mt-4 max-w-full rounded-xl bg-muted/70 p-3 text-sm leading-7 text-muted-foreground; } .research-loading { @apply mt-5 animate-pulse text-sm font-semibold text-emerald-800 dark:text-emerald-300; }
   .research-metrics { @apply mt-4 flex min-w-0 flex-wrap gap-2 text-xs text-muted-foreground; } .research-metrics span { overflow-wrap: anywhere; @apply max-w-full rounded-full border border-border bg-background px-2.5 py-1; }
@@ -113,6 +115,35 @@
   .match-chip { @apply rounded-full bg-emerald-700/10 px-2 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300; } .grade-source-chip { @apply rounded-full bg-emerald-100 px-2 py-1 font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300; } .no-grade-chip { @apply rounded-full bg-amber-100 px-2 py-1 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300; } .meta-chip { @apply rounded-full bg-muted px-2 py-1 text-muted-foreground; } .meta-link { @apply rounded-full bg-emerald-700 px-2 py-1 font-semibold text-white hover:bg-emerald-800; }
   .narrator-limit { @apply mt-5 flex min-w-0 gap-3 rounded-xl border border-amber-700/15 bg-amber-50/70 p-4 text-sm leading-7 text-amber-950 dark:border-amber-300/10 dark:bg-amber-100/5 dark:text-amber-100; } .narrator-limit p { overflow-wrap: anywhere; @apply min-w-0; }
   .research-note-input { @apply min-h-48 w-full resize-y rounded-xl border border-border bg-background p-3 text-sm leading-7 text-foreground outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10; }
+
+  /* طرق الحديث وسلسلة الرواة */
+  .tariq-card { @apply relative min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-background/50 p-4 sm:p-5; border-inline-start: 3px solid var(--gold); }
+  .tariq-header { @apply flex min-w-0 flex-wrap items-start gap-3; }
+  .tariq-badge { @apply grid size-9 shrink-0 place-items-center rounded-xl text-white; background: linear-gradient(145deg, oklch(0.42 0.095 155), oklch(0.3 0.08 155)); }
+  .tariq-narrator-chain { @apply relative mt-4 space-y-4 border-t border-dashed border-border pt-4; }
+  .narrator-node { @apply relative min-w-0; }
+  .narrator-node:not(:last-child)::after { content: ""; position: absolute; top: 2.25rem; bottom: -1rem; inset-inline-start: 1.1rem; width: 1px; background: linear-gradient(var(--border), transparent); }
+  .narrator-node-head { @apply flex min-w-0 items-center gap-2.5; }
+  .narrator-avatar { @apply grid size-7 shrink-0 place-items-center rounded-full border text-emerald-800 dark:text-emerald-300; background: var(--gold-soft); border-color: color-mix(in oklch, var(--gold) 45%, transparent); }
+  .narrator-opinion { @apply min-w-0 max-w-full rounded-lg bg-muted/45 p-3; }
+  .verdict-chip { @apply mr-2 inline-block rounded-full px-2 py-0.5 align-middle text-[.68rem] font-bold; background: var(--gold-soft); color: color-mix(in oklch, var(--gold-foreground) 80%, var(--foreground)); }
+
+  /* أزرار نموذج المراجعة التفاعلي */
+  .review-control { @apply flex shrink-0 flex-wrap items-center gap-1; }
+  .review-btn { @apply inline-flex items-center gap-1 rounded-full border border-border bg-background px-2 py-1 text-[.68rem] font-semibold text-muted-foreground transition hover:bg-muted; }
+  .review-btn span { @apply hidden sm:inline; }
+  .review-btn-verified { @apply border-emerald-600/40 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300; }
+  .review-btn-flagged { @apply border-amber-600/40 bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300; }
+  .review-btn-rejected { @apply border-red-600/40 bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300; }
+  .review-btn-note { @apply border-emerald-600/40 text-emerald-800 dark:text-emerald-300; }
+
+  .review-progress { @apply mx-auto mt-6 max-w-4xl min-w-0 rounded-2xl border border-border bg-card/70 p-4; }
+  .review-progress-track { @apply mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted; }
+  .review-progress-fill { @apply h-full rounded-full transition-all; background: linear-gradient(90deg, var(--gold), oklch(0.52 0.11 155)); }
+  .review-progress-legend { @apply mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[.7rem] font-semibold text-muted-foreground; }
+  .review-progress-legend .legend-verified { @apply text-emerald-700 dark:text-emerald-300; }
+  .review-progress-legend .legend-flagged { @apply text-amber-700 dark:text-amber-300; }
+  .review-progress-legend .legend-rejected { @apply text-red-700 dark:text-red-300; }
   .share-card { overflow: hidden; border-radius: 1rem; background: #fbfaf3; color: #23352c; border: 1px solid #d9d5c7; box-shadow: 0 12px 28px -20px rgba(13, 72, 47, .45); }
   .share-card-topline { display: flex; align-items: center; gap: .65rem; min-height: 4.6rem; padding: 1rem 1.15rem; color: #fff9e8; background: linear-gradient(125deg, #0b4a31, #13643e 62%, #0e5132); }
   .share-card-mark { display: grid; place-items: center; width: 2.35rem; height: 2.35rem; flex: none; border-radius: .7rem; background: rgba(255,255,255,.12); color: #e5c56f; }
