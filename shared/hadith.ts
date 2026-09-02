@@ -12,6 +12,31 @@ export type ScholarlyOpinion = {
   conclusion: string;
 };
 
+export type NarratorVerdict = "ثقة" | "صدوق" | "لين الحديث" | "ضعيف" | "متروك" | "مختلف فيه" | "غير محرر";
+
+export type NarratorOpinion = {
+  scholar: string;
+  statement: string;
+  verdict: NarratorVerdict;
+  book: string;
+  reference: string;
+  documented: boolean;
+};
+
+export type HadithNarrator = {
+  name: string;
+  tabaqah: string;
+  role: string;
+  opinions: NarratorOpinion[];
+};
+
+export type HadithTariq = {
+  label: string;
+  grade: string;
+  note: string;
+  narrators: HadithNarrator[];
+};
+
 export type HadithAnalysis = {
   matn: string;
   grade: HadithGrade;
@@ -22,6 +47,7 @@ export type HadithAnalysis = {
   isnadStudy: string[];
   matnStudy: string[];
   scholars: ScholarlyOpinion[];
+  turuq: HadithTariq[];
   caution: string;
 };
 

@@ -1,11 +1,14 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ResultCard } from "@/components/ResultCard";
+import { ReviewProgress } from "@/components/ReviewProgress";
+import { TuruqSection, turuqClaimIds } from "@/components/TuruqSection";
 import { useTheme } from "@/contexts/ThemeContext";
 import { loadResearchNotes, loadStoredHadith, writeResearchNote, FAVORITES_KEY, HISTORY_KEY, limitStored, saveStoredHadith } from "@/lib/hadithStorage";
+import { loadReview, summarizeReview, type ReviewEntry, type ReviewMap } from "@/lib/reviewState";
 import type { StoredHadith } from "@shared/hadith";
 import { ArrowRight, BookOpenCheck, BookText, ExternalLink, FileSearch, History, Moon, NotebookPen, Scale, SearchX, Sun, UserRoundSearch } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useRoute } from "wouter";
 
 const NARRATOR_SOURCES = [
@@ -33,6 +36,7 @@ export default function HadithDossier() {
   const [favorites, setFavorites] = useState<StoredHadith[]>([]);
   const [note, setNote] = useState("");
   const [savedNote, setSavedNote] = useState(false);
+  const [reviewMap, setReviewMap] = useState<ReviewMap>({});
 
   useEffect(() => {
     const history = loadStoredHadith(HISTORY_KEY);
@@ -40,7 +44,19 @@ export default function HadithDossier() {
     setRecord(current);
     setFavorites(loadStoredHadith(FAVORITES_KEY));
     setNote(current ? loadResearchNotes()[current.id] ?? "" : "");
+    setReviewMap(current ? loadReview(current.id) : {});
   }, [params?.id]);
+
+  const claimIds = useMemo(() => (record ? turuqClaimIds(record.turuq) : []), [record]);
+  const reviewSummary = useMemo(() => summarizeReview(reviewMap, claimIds), [reviewMap, claimIds]);
+  const handleReviewChange = (claimId: string, entry: ReviewEntry | null) => {
+    setReviewMap(prev => {
+      const next = { ...prev };
+      if (entry) next[claimId] = entry;
+      else delete next[claimId];
+      return next;
+    });
+  };
 
   const toggleFavorite = () => {
     if (!record) return;
@@ -68,14 +84,20 @@ export default function HadithDossier() {
         <div className="flex min-w-0 items-start gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-700 text-white"><FileSearch className="size-5" /></span><div className="min-w-0"><p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">ملف بحث الحديث</p><h1 className="mt-1 break-words text-lg font-bold">مسار موسع للتخريج والتدوين والمراجعة</h1><p className="mt-1 text-xs leading-6 text-muted-foreground">يُظهر المصدر المنقول بوضوح، ويفصل بين البيانات المصدرية وخلاصة التحليل الآلي.</p></div></div>
         <div className="flex flex-wrap gap-2"><span className="rounded-full bg-card px-3 py-1.5 text-xs text-muted-foreground"><History className="ml-1 inline size-3.5" />{new Date(record.checkedAt).toLocaleDateString("ar-EG")}</span><span className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground">محفوظ على هذا الجهاز</span></div>
       </div>
+      {claimIds.length > 0 ? <ReviewProgress summary={reviewSummary} /> : null}
       <ResultCard result={record} favorite={favorites.some(item => item.id === record.id)} onToggleFavorite={toggleFavorite} />
+      <section className="research-dossier-card" aria-labelledby="turuq-title">
+        <div className="dossier-heading"><div><p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">طرق الحديث والرواة</p><h2 id="turuq-title">تفصيل الأسانيد وأقوال أئمة الجرح والتعديل</h2></div><UserRoundSearch className="size-5 shrink-0 text-emerald-700" /></div>
+        <p className="source-disclaimer">كل بيان أدناه مسودة من التحليل الآلي معروضة للمراجعة العلمية البشرية، وليست حكماً نهائياً. الأقوال المعلَّمة «غير موثّق» لم يذكر لها النموذج كتاباً وموضعاً محدَّدين عن ثقة، فتحقق منها من المصادر المرجعية قبل اعتمادها. استخدم أزرار المراجعة أسفل كل عنصر لتسجيل قرارك.</p>
+        <div className="mt-5"><TuruqSection hadithId={record.id} turuq={record.turuq} reviewMap={reviewMap} onReviewChange={handleReviewChange} /></div>
+      </section>
       <section className="research-dossier-card" aria-labelledby="sources-title">
-        <div className="dossier-heading"><div><p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">مراجع التحقق</p><h2 id="sources-title">كتب الجرح والتعديل المتاحة للمراجعة</h2></div><BookOpenCheck className="size-5 shrink-0 text-emerald-700" /></div>
-        <p className="source-disclaimer">أزيلت طبقة البحث النصي في مجموعات لا تعطي نتيجة مستقرة أو إحالة كافية. لا يعرض هذا الملف قولاً في راوٍ حتى يُوثّق باسم الناقد والكتاب والموضع.</p>
+        <div className="dossier-heading"><div><p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">مراجع التحقق</p><h2 id="sources-title">كتب الجرح والتعديل المتاحة للمراجعة اليدوية</h2></div><BookOpenCheck className="size-5 shrink-0 text-emerald-700" /></div>
+        <p className="source-disclaimer">نسخ رقمية موثقة لكتب الرجال يمكن للباحث فتحها لمراجعة أي قول ظهر أعلاه أو للبحث عن رواة لم يذكرهم التحليل الآلي.</p>
         <div className="mt-5 grid gap-3 md:grid-cols-2">{NARRATOR_SOURCES.map(book => <article className="corpus-book" key={book.title}><div className="p-4"><p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">{book.source}</p><h3 className="mt-1 break-words font-bold text-foreground">{book.title}</h3><p className="mt-1 break-words text-xs leading-6 text-muted-foreground">{book.author}</p><p className="mt-3 break-words text-sm leading-7 text-muted-foreground">{book.note}</p><a href={book.href} target="_blank" rel="noreferrer" className="dataset-link mt-4"><span>فتح المصدر</span><ExternalLink className="size-3.5" /></a></div></article>)}</div>
       </section>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
-        <section className="research-dossier-card"><div className="dossier-heading"><div><p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">الجرح والتعديل</p><h2>تفصيل الرواة وأقوال النقاد</h2></div><UserRoundSearch className="size-5 shrink-0 text-emerald-700" /></div><div className="narrator-limit"><Scale className="size-5 shrink-0" /><p>لا توجد حالياً قاعدة رواة مرخّصة ومفهرسة تتيح إسناد كل قول إلى الكتاب والموضع آلياً. لذلك حُجبت النتائج غير الموثقة بدلاً من توليد أحكام للرواة. يمكن للباحث فتح المصادر أعلاه وتسجيل الإحالة المراجعة في دفتره.</p></div><div className="mt-5"><h3 className="detail-heading">أقوال ظهرت في الخلاصة الآلية</h3>{record.scholars.length ? <div className="space-y-3">{record.scholars.map((item, index) => <blockquote className="scholar-quote" key={`${item.scholar}-${index}`}><p>«{item.opinion}»</p><footer><strong>{item.scholar}</strong><span>{item.conclusion} — يلزم التحقق من المصدر قبل التدوين العلمي.</span></footer></blockquote>)}</div> : <p className="detail-empty">لا توجد أقوال منسوبة في النتيجة الحالية.</p>}</div></section>
+        <section className="research-dossier-card"><div className="dossier-heading"><div><p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">حكم الأئمة على الحديث</p><h2>أقوال ظهرت في الخلاصة الآلية</h2></div><Scale className="size-5 shrink-0 text-emerald-700" /></div><div className="mt-5">{record.scholars.length ? <div className="space-y-3">{record.scholars.map((item, index) => <blockquote className="scholar-quote" key={`${item.scholar}-${index}`}><p>«{item.opinion}»</p><footer><strong>{item.scholar}</strong><span>{item.conclusion} — يلزم التحقق من المصدر قبل التدوين العلمي.</span></footer></blockquote>)}</div> : <p className="detail-empty">لا توجد أقوال منسوبة في النتيجة الحالية.</p>}</div></section>
         <section className="research-dossier-card"><div className="dossier-heading"><div><p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">دفتر الباحث</p><h2>ملاحظاتك المحلية</h2></div><NotebookPen className="size-5 shrink-0 text-emerald-700" /></div><p className="mb-3 text-sm leading-7 text-muted-foreground">سجّل اسم الراوي وموضع القول في المصدر بعد مراجعته. تُحفظ الملاحظة على جهازك فقط ولا تُرسل إلى أي خادم.</p><textarea value={note} onChange={event => setNote(event.target.value)} placeholder="مثال: راجع قول ابن معين في التاريخ، المجلد ١، ص ١٢٣…" className="research-note-input" /><div className="mt-3 flex items-center justify-between gap-3"><p className="text-xs text-muted-foreground">{savedNote ? "تم حفظ الملاحظة محلياً." : ""}</p><Button size="sm" onClick={saveNote} className="bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-600">حفظ الملاحظة</Button></div></section>
       </div>
     </div></main>

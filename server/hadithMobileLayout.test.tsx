@@ -11,7 +11,7 @@ import { SavedPanel } from "../client/src/components/SavedPanel";
 import { ResultCard } from "../client/src/components/ResultCard";
 import type { StoredHadith } from "../shared/hadith";
 
-const longItem: StoredHadith = { id: "long", checkedAt: 1_700_000_000_000, matn: "من قرأ بالآيتين من آخر سورة البقرة في ليلة كفتاه، وهذا نص طويل جداً للتحقق من بقاء المتن داخل حدود البطاقة على شاشة الهاتف الصغيرة", grade: "صحيح", gradeType: "درجة مفصلة مختلفة في بعض طرق الحديث الطويلة", summary: "", confidenceNote: "", sources: [], isnadStudy: [], matnStudy: [], scholars: [], caution: "" };
+const longItem: StoredHadith = { id: "long", checkedAt: 1_700_000_000_000, matn: "من قرأ بالآيتين من آخر سورة البقرة في ليلة كفتاه، وهذا نص طويل جداً للتحقق من بقاء المتن داخل حدود البطاقة على شاشة الهاتف الصغيرة", grade: "صحيح", gradeType: "درجة مفصلة مختلفة في بعض طرق الحديث الطويلة", summary: "", confidenceNote: "", sources: [], isnadStudy: [], matnStudy: [], scholars: [], turuq: [], caution: "" };
 
 describe("احتواء بطاقات الحديث على الهاتف", () => {
   it("يفرض طي المتن الطويل والتفاف معلومات الدرجة والتاريخ داخل بطاقة محفوظة", () => {
